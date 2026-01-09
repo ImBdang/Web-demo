@@ -30,3 +30,8 @@ sudo chmod +x cmd.sh
 0.0.0.0:8000
 
 
+NOTE: Hay thay ip dia chi server mqtt trong file main.py tai dong 
+
+MQTT_HOST = os.getenv("MQTT_HOST", "DIA CHI SERVER")
+
+O Day su dung MQTT co ban, port 1883 tcp
