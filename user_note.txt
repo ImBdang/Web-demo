@@ -1,0 +1,40 @@
+file requirements.txt la danh sach cac package python su dung cho project
+cai dat no bang cau lenh sau
+
+pip install -r requirements.txt
+
+NOTE: Neu nhu xay ra loi phien ban gi thi co the la do version python
+Version Python trong project la 3.10.12
+
+
+
+file enable_ble.sh la file bat bluetooth tren laptop
+neu nhu thiet bi la pc case thi can co module bluetooth rieng
+hoac su dung laptop co module bluetooth
+
+cap quyen cho file roi execute de unlock va enable bluetooth
+
+sudo chmod +x enable_ble.sh
+./enable_ble.sh
+
+NOTE: Neu khong test bluetooth thi khong can chay
+
+
+
+Sau khi cai package python day du chay file cmd.sh de host web local
+
+
+
+sudo chmod +x cmd.sh
+./cmd.sh
+
+
+0.0.0.0:8000
+
+
+
+NOTE: Hay thay ip dia chi server mqtt trong file main.py tai dong 
+
+MQTT_HOST = os.getenv("MQTT_HOST", "DIA CHI SERVER")
+
+O Day su dung MQTT co ban, port 1883 tcp

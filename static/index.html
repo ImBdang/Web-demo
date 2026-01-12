@@ -1,0 +1,820 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Datic Control Panel</title>
+  <style>
+    :root{
+      --bg1:#0b1020; --bg2:#101b3a;
+      --card:#0f1730cc; --border:#ffffff14;
+      --text:#e9ecff; --muted:#a9b0d6;
+      --on:#22c55e; --off:#ef4444; --warn:#f59e0b;
+      --shadow: 0 20px 60px rgba(0,0,0,.45);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
+      color:var(--text);
+      background:
+        radial-gradient(900px 700px at 20% 10%, #223a7a55 0%, transparent 60%),
+        radial-gradient(900px 700px at 80% 30%, #7c3aed44 0%, transparent 60%),
+        linear-gradient(160deg, var(--bg1), var(--bg2));
+      display:grid;
+      place-items:center;
+      padding:24px;
+    }
+    .card{
+      width:min(900px, 96vw);
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:24px;
+      box-shadow:var(--shadow);
+      backdrop-filter: blur(10px);
+      padding:24px;
+    }
+    .top{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:12px; margin-bottom:14px;
+    }
+    .title h1{margin:0; font-size:18px}
+    .title .sub{color:var(--muted); font-size:13px; margin-top:4px}
+    .conn{
+      display:flex; align-items:center; gap:8px;
+      color:var(--muted); font-size:13px;
+      padding:8px 10px;
+      border:1px solid var(--border);
+      border-radius:999px;
+      background:#0b122799;
+      white-space:nowrap;
+    }
+    .dot{
+      width:10px; height:10px; border-radius:50%;
+      background:var(--warn);
+      box-shadow:0 0 0 4px rgba(245,158,11,.18);
+    }
+    .dot.ok{
+      background:var(--on);
+      box-shadow:0 0 0 4px rgba(34,197,94,.18);
+    }
+    .dot.bad{
+      background:var(--off);
+      box-shadow:0 0 0 4px rgba(239,68,68,.18);
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:14px;
+      margin-top:12px;
+    }
+    @media (max-width: 860px){
+      .grid{ grid-template-columns: 1fr; }
+    }
+
+    .panel{
+      border:1px solid var(--border);
+      border-radius:18px;
+      background:#0b122799;
+      padding:16px;
+      box-shadow: 0 12px 24px rgba(0,0,0,.25);
+    }
+    .panel h2{
+      margin:0 0 10px 0;
+      font-size:14px;
+      letter-spacing:.35px;
+      color:#dbe3ff;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      color:var(--muted);
+      font-size:12px;
+      background:#0b1227cc;
+    }
+    .kv{
+      display:grid;
+      grid-template-columns: 160px 1fr;
+      gap:10px;
+      font-size:13px;
+      color:var(--muted);
+      margin:8px 0;
+      align-items:center;
+    }
+    .val{
+      color:var(--text);
+      font-weight:800;
+    }
+    .actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:12px;
+    }
+    .btn{
+      flex:1 1 160px;
+      max-width:280px;
+      height:44px;
+      border:1px solid var(--border);
+      border-radius:14px;
+      background:#0b122799;
+      color:var(--text);
+      font-weight:900;
+      letter-spacing:.25px;
+      cursor:pointer;
+      user-select:none;
+      transition: transform .12s ease, filter .2s ease, opacity .2s ease;
+      box-shadow: 0 10px 18px rgba(0,0,0,.22);
+    }
+    .btn:hover{ transform: translateY(-1px); filter: brightness(1.05); }
+    .btn:active{ transform: translateY(0px) scale(.99); }
+    .btn:disabled{ cursor:not-allowed; opacity:.45; transform:none; box-shadow:none; }
+
+    .btn.on{ background: linear-gradient(135deg, #16a34a, #22c55e); border-color:rgba(34,197,94,.25); }
+    .btn.off{ background: linear-gradient(135deg, #b91c1c, #ef4444); border-color:rgba(239,68,68,.25); }
+    .btn.neu{ background: linear-gradient(135deg, #334155, #475569); }
+
+    .row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      margin-top:10px;
+    }
+    input{
+      height:40px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background:#0b1227cc;
+      color:var(--text);
+      padding:0 12px;
+      outline:none;
+      width: 170px;
+    }
+    input::placeholder{ color:#7f88b5; }
+
+    .hint{
+      margin-top:12px;
+      color:var(--muted);
+      font-size:12px;
+      min-height:16px;
+    }
+    code{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size:12px;
+      color:#c7d2fe;
+      background:#0b1227cc;
+      border:1px solid var(--border);
+      padding:4px 8px;
+      border-radius:8px;
+      word-break:break-all;
+    }
+
+    .footer{
+      margin-top:14px;
+      padding-top:12px;
+      border-top:1px solid var(--border);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      color:var(--muted);
+      font-size:12px;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    .panel.full { grid-column: 1 / -1; }
+
+    .logbox{
+      height: 220px;
+      overflow: auto;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background:#0b1227cc;
+      padding: 8px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 12px;
+      color: #c7d2fe;
+      line-height: 1.45;
+    }
+    .logline{
+      padding: 6px 8px;
+      border-bottom: 1px solid var(--border);
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .logline:last-child{ border-bottom: none; }
+
+    .logrow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-bottom:10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="top">
+      <div class="title">
+        <h1>Datic Control Panel</h1>
+        <div class="sub">MQTT topics: <code>/device/datic/control</code> & <code>/device/datic/status</code></div>
+      </div>
+      <div class="conn">
+        <span id="dot" class="dot"></span>
+        <span id="connText">Connecting…</span>
+      </div>
+      <div class="conn">
+        <span>sender</span>
+        <input id="inSender" type="text" placeholder="user_id" value="1" style="width:140px; height:32px;" />
+      </div>
+
+    </div>
+
+    <div class="grid">
+      <!-- Trigger -->
+      <div class="panel">
+        <h2>
+          Trigger (ON/OFF)
+          <span class="pill">Last: <span id="tsTrigger">—</span></span>
+        </h2>
+        <div class="kv"><div>Current mode</div><div class="val" id="switchMode">—</div></div>
+        <div class="kv"><div>Enable</div><div class="val" id="triggerEnable">—</div></div>
+
+        <div class="actions">
+          <button id="btnTrigOn" class="btn on">TRIGGER ON (1)</button>
+          <button id="btnTrigOff" class="btn off">TRIGGER OFF (0)</button>
+        </div>
+      </div>
+
+      <!-- Repeat -->
+      <div class="panel">
+        <h2>
+          Repeat (work/duration)
+          <span class="pill">Last: <span id="tsRepeat">—</span></span>
+        </h2>
+
+        <div class="kv"><div>work_time (ms)</div><div class="val" id="repWork">—</div></div>
+        <div class="kv"><div>duration_time (ms)</div><div class="val" id="repDur">—</div></div>
+
+        <div class="row">
+          <input id="inWork" type="number" min="0" placeholder="work_time ms" />
+          <input id="inDur" type="number" min="0" placeholder="duration_time ms" />
+        </div>
+        <div class="actions">
+          <button id="btnRepeatApply" class="btn neu">LẶP TUẦN HOÀN (2)</button>
+          <button id="btnRepeatStop" class="btn off">STOP (CMD 0)</button>
+        </div>
+      </div>
+
+      <!-- Lock -->
+      <div class="panel">
+        <h2>
+          Lock
+          <span class="pill">Last: <span id="tsLock">—</span></span>
+        </h2>
+
+        <div class="kv"><div>lock_mode</div><div class="val" id="lockMode">—</div></div>
+        <div class="kv"><div>APP enabled</div><div class="val" id="appEnabled">—</div></div>
+        <div class="kv"><div>DEV enabled</div><div class="val" id="devEnabled">—</div></div>
+
+        <div class="actions">
+          <button class="btn neu" id="btnUnlockAll">UNLOCK ALL (3)</button>
+          <button class="btn neu" id="btnLockApp">LOCK APP (4)</button>
+          <button class="btn neu" id="btnLockDevice">LOCK DEVICE (5)</button>
+        </div>
+      </div>
+
+      <!-- Save -->
+      <div class="panel">
+        <h2>
+          Save Mode (boot)
+          <span class="pill">Last: <span id="tsSave">—</span></span>
+        </h2>
+
+        <div class="kv"><div>save_mode</div><div class="val" id="saveMode">—</div></div>
+        <div class="kv"><div>Meaning</div><div class="val" id="saveMeaning">—</div></div>
+
+        <div class="actions">
+          <button class="btn neu" id="btnSave0">6: DEFAULT OFF</button>
+          <button class="btn neu" id="btnSave1">7: DEFAULT ON</button>
+          <button class="btn neu" id="btnSave2">8: LAST STATE</button>
+        </div>
+      </div>
+
+
+      <!-- BLE -->
+      <div class="panel full">
+        <h2>
+          Bluetooth LE (backend gateway)
+          <span class="pill">State: <span id="bleState">—</span></span>
+        </h2>
+
+        <div class="row">
+          <button id="btnBleScan" class="btn neu" style="max-width:160px;">SCAN</button>
+          <select id="bleList" style="flex:1; min-width:260px;">
+            <option value="">(chưa có thiết bị)</option>
+          </select>
+          <button id="btnBleConnect" class="btn neu" style="max-width:160px;">CONNECT</button>
+          <button id="btnBleDisconnect" class="btn neu" style="max-width:160px;">DISCONNECT</button>
+        </div>
+
+        <div class="row">
+          <button id="btnBleSendWifi" class="btn neu" style="max-width:160px;">CONFIG</button>
+        </div>
+
+        <div class="hint" id="bleHint">Tip: set env BLE_RX_CHAR_UUID để write đúng characteristic. SEND WIFI sẽ tự lấy Wi‑Fi hiện tại từ Ubuntu và gửi dạng ssid.<SSID>;pass.<PASS>.</div>
+      </div>
+
+      <!-- Log -->
+      <div class="panel full">
+        <h2>
+          Log (status received)
+          <span class="pill">Device sender: <span id="devSender">—</span></span>
+        </h2>
+
+        <div class="logrow">
+          <div class="pill">Theo message /device/datic/status</div>
+          <button id="btnClearLog" class="btn neu" style="flex:0 0 auto; max-width:160px; height:36px;">
+            CLEAR LOG
+          </button>
+        </div>
+
+        <div id="logBox" class="logbox"></div>
+      </div>
+    </div>
+
+    <div class="hint" id="hint">Ready.</div>
+
+    <div class="footer">
+      <div>WS: <code id="wsUrl"></code></div>
+      <div>UI tự reconnect</div>
+    </div>
+  </div>
+
+  <script>
+    const dot = document.getElementById("dot");
+    const connText = document.getElementById("connText");
+    const wsUrlEl = document.getElementById("wsUrl");
+    const hintEl = document.getElementById("hint");
+    
+    const inSender = document.getElementById("inSender");
+    let senderCache = null;
+    // BLE UI
+    const bleStateEl = document.getElementById("bleState");
+    const bleHintEl = document.getElementById("bleHint");
+    const btnBleScan = document.getElementById("btnBleScan");
+    const btnBleConnect = document.getElementById("btnBleConnect");
+    const btnBleDisconnect = document.getElementById("btnBleDisconnect");
+    const btnBleWrite = document.getElementById("btnBleWrite");
+    const btnBleSendWifi = document.getElementById("btnBleSendWifi");
+    const bleListEl = document.getElementById("bleList");
+    const inBleText = document.getElementById("inBleText");
+
+    const switchModeEl = document.getElementById("switchMode");
+    const triggerEnableEl = document.getElementById("triggerEnable");
+    const repWorkEl = document.getElementById("repWork");
+    const repDurEl = document.getElementById("repDur");
+
+    const lockModeEl = document.getElementById("lockMode");
+    const appEnabledEl = document.getElementById("appEnabled");
+    const devEnabledEl = document.getElementById("devEnabled");
+
+    const saveModeEl = document.getElementById("saveMode");
+    const saveMeaningEl = document.getElementById("saveMeaning");
+
+    const tsTrigger = document.getElementById("tsTrigger");
+    const tsRepeat = document.getElementById("tsRepeat");
+    const tsLock = document.getElementById("tsLock");
+    const tsSave = document.getElementById("tsSave");
+
+    const btnTrigOn = document.getElementById("btnTrigOn");
+    const btnTrigOff = document.getElementById("btnTrigOff");
+
+    const inWork = document.getElementById("inWork");
+    const inDur = document.getElementById("inDur");
+    const btnRepeatApply = document.getElementById("btnRepeatApply");
+    const btnRepeatStop = document.getElementById("btnRepeatStop");
+
+    const btnUnlockAll = document.getElementById("btnUnlockAll");
+    const btnLockApp = document.getElementById("btnLockApp");
+    const btnLockDevice = document.getElementById("btnLockDevice");
+
+    const btnSave0 = document.getElementById("btnSave0");
+    const btnSave1 = document.getElementById("btnSave1");
+    const btnSave2 = document.getElementById("btnSave2");
+
+    const logBox = document.getElementById("logBox");
+    const btnClearLog = document.getElementById("btnClearLog");
+    const devSenderEl = document.getElementById("devSender");
+
+    let lastLogTs = null;
+    const LOG_MAX = 150;
+
+    function setHint(t){ hintEl.textContent = t || ""; }
+
+    function setConn(state){
+      dot.classList.remove("ok","bad");
+      if(state === "ok") dot.classList.add("ok");
+      else if(state === "bad") dot.classList.add("bad");
+
+      // disable buttons nếu WS chưa ok
+      const enabled = (state === "ok");
+      const buttons = [
+        btnTrigOn, btnTrigOff,
+        btnRepeatApply, btnRepeatStop,
+        btnUnlockAll, btnLockApp, btnLockDevice,
+        btnSave0, btnSave1, btnSave2
+      ];
+      for(const b of buttons){
+        if(b) b.disabled = !enabled;
+      }
+    }
+
+    function fmtTsUnix(sec){
+      if (!sec) return "—";
+      const d = new Date(sec * 1000);
+      return d.toLocaleTimeString();
+    }
+
+    function appendLogLine(text){
+      if (!logBox) return;
+      const line = document.createElement("div");
+      line.className = "logline";
+      line.textContent = text;
+      logBox.appendChild(line);
+
+      while (logBox.children.length > LOG_MAX) {
+        logBox.removeChild(logBox.firstChild);
+      }
+      logBox.scrollTop = logBox.scrollHeight;
+    }
+
+    function saveMeaning(sm){
+      if(sm === 0) return "Default OFF after power";
+      if(sm === 1) return "Default ON after power";
+      if(sm === 2) return "Load last saved state";
+      return "—";
+    }
+
+    function deriveLockEnabled(lock_mode){
+      // firmware:
+      // 0 - not lock
+      // 1 - lock device
+      // 2 - lock app
+      // 3 - lock all
+      const dev_enabled = !(lock_mode === 1 || lock_mode === 3);
+      const app_enabled = !(lock_mode === 2 || lock_mode === 3);
+      return {dev_enabled, app_enabled};
+    }
+
+    function buildStatusLogLine(lastTs, lastRaw){
+      const t = fmtTsUnix(lastTs);
+
+      let sender = "—";
+      let mode = "—";
+      let extra = "";
+
+      try{
+        const obj = JSON.parse(lastRaw || "{}");
+        if (obj && typeof obj === "object"){
+          if (obj.sender != null) sender = String(obj.sender);
+          if (obj.mode != null) mode = String(obj.mode);
+
+          if (mode === "trigger"){
+            const en = (obj.enable != null) ? String(obj.enable) : "—";
+            extra = `enable=${en}`;
+          } else if (mode === "repeat"){
+            const wt = (obj.work_time != null) ? String(obj.work_time) : "—";
+            const dt = (obj.duration_time != null) ? String(obj.duration_time) : "—";
+            extra = `work_time=${wt} duration_time=${dt}`;
+          } else if (mode === "lock"){
+            const lm = (obj.lock_mode != null) ? String(obj.lock_mode) : "—";
+            extra = `lock_mode=${lm}`;
+          } else if (mode === "save"){
+            const sm = (obj.save_mode != null) ? String(obj.save_mode) : "—";
+            extra = `save_mode=${sm}`;
+          } else {
+            extra = `raw=${String(lastRaw || "").slice(0, 160)}`;
+          }
+        }
+      }catch(e){
+        extra = `raw=${String(lastRaw || "").slice(0, 160)}`;
+      }
+
+      return `[${t}] sender=${sender} mode=${mode}${extra ? " " + extra : ""}`;
+    }
+
+    function render(state){
+      if (!state || typeof state !== "object") return;
+
+      // show mqtt connected hint
+      const mc = state.mqtt && state.mqtt.connected === true;
+      // show dev sender
+      const devSender = state.device && state.device.sender != null ? String(state.device.sender) : "—";
+      devSenderEl.textContent = devSender;
+
+      senderCache = devSender !== "—" ? devSender : senderCache;
+      if (inSender && (!inSender.value || !inSender.value.trim()) && senderCache) {
+        inSender.value = senderCache;
+      }
+      // switch
+      const sw = state.switch || {};
+      if (sw.mode != null) switchModeEl.textContent = String(sw.mode);
+
+      if (sw.mode === "trigger"){
+        const en = sw.enable;
+        triggerEnableEl.textContent = (en === 1) ? "ON (1)" : (en === 0 ? "OFF (0)" : "—");
+      } else {
+        // nếu không phải trigger thì vẫn show enable (đỡ rỗng)
+        const en = sw.enable;
+        triggerEnableEl.textContent = (en === 1) ? "ON (1)" : (en === 0 ? "OFF (0)" : "—");
+      }
+
+      if (sw.work_time != null) repWorkEl.textContent = String(sw.work_time);
+      if (sw.duration_time != null) repDurEl.textContent = String(sw.duration_time);
+
+      // lock
+      const lk = state.lock || {};
+      if (lk.lock_mode != null){
+        const lm = Number(lk.lock_mode);
+        lockModeEl.textContent = String(lm);
+        const d = deriveLockEnabled(lm);
+        appEnabledEl.textContent = d.app_enabled ? "YES" : "NO";
+        devEnabledEl.textContent = d.dev_enabled ? "YES" : "NO";
+      }
+
+      // save
+      const sv = state.save || {};
+      if (sv.save_mode != null){
+        const sm = Number(sv.save_mode);
+        saveModeEl.textContent = String(sm);
+        saveMeaningEl.textContent = saveMeaning(sm);
+      }
+
+      // update timestamps + append log if new
+      const last = state.last || {};
+      if (last.ts != null && last.raw != null){
+        if (lastLogTs === null || last.ts !== lastLogTs){
+          appendLogLine(buildStatusLogLine(last.ts, last.raw));
+          lastLogTs = last.ts;
+
+          // set per-mode "Last:" display
+          try{
+            const o = JSON.parse(last.raw);
+            const m = o && o.mode ? String(o.mode) : "";
+            const t = fmtTsUnix(last.ts);
+            if (m === "trigger") tsTrigger.textContent = t;
+            else if (m === "repeat") tsRepeat.textContent = t;
+            else if (m === "lock") tsLock.textContent = t;
+            else if (m === "save") tsSave.textContent = t;
+          }catch(e){}
+        }
+      }
+
+      // hint
+      setHint(`WS OK • MQTT ${mc ? "OK" : "OFFLINE"} • Device sender: ${devSender}`);
+    }
+
+    btnClearLog.addEventListener("click", () => {
+      logBox.innerHTML = "";
+      lastLogTs = null;
+      setHint("Cleared log.");
+    });
+
+    // =========================
+    // WebSocket
+    // =========================
+    const wsUrl = `${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/ws`;
+    wsUrlEl.textContent = wsUrl;
+
+    let ws = null;
+    let retryMs = 400;
+
+function parseSender(v){
+  if (v == null) return null;
+  if (typeof v === "number") return Math.trunc(v);
+  const s = String(v).trim();
+  if (!s) return null;
+  if (/^[+-]?\d+$/.test(s)) return parseInt(s, 10);
+  return s;
+}
+
+function getSender(){
+  const v1 = (inSender && inSender.value) ? inSender.value : "";
+  const s1 = parseSender(v1);
+  if (s1 != null) return s1;
+
+  const s2 = parseSender(senderCache);
+  if (s2 != null) return s2;
+
+  return null;
+}
+
+
+
+    function send(obj){
+  if(!ws || ws.readyState !== WebSocket.OPEN){
+    setHint("WebSocket chưa sẵn sàng");
+    return;
+  }
+
+  if (obj && typeof obj === "object" && obj.type !== "ble"){
+    if (obj.sender == null){
+      const s = getSender();
+      if (!s){
+        setHint("Thiếu sender/user_id");
+        return;
+      }
+      obj.sender = s;
+    }
+  }
+
+  try{
+    ws.send(JSON.stringify(obj));
+    setHint(`Đã gửi: ${JSON.stringify(obj)}`);
+  }catch(e){
+    setHint("Gửi thất bại");
+  }
+}
+
+    // =========================
+    // BLE (backend gateway) helpers
+    // =========================
+    function bleSetState(s){ if(bleStateEl) bleStateEl.textContent = s; }
+    function bleSetHint(s){ if(bleHintEl) bleHintEl.textContent = s || ""; }
+
+    function bleFillList(devices){
+      if(!bleListEl) return;
+      bleListEl.innerHTML = "";
+      if(!devices || devices.length === 0){
+        const opt = document.createElement("option");
+        opt.value = "";
+        opt.textContent = "(không thấy thiết bị)";
+        bleListEl.appendChild(opt);
+        return;
+      }
+      for(const d of devices){
+        const opt = document.createElement("option");
+        opt.value = d.address || "";
+        const name = (d.name && d.name.trim()) ? d.name.trim() : "(no name)";
+        const rssi = (d.rssi != null) ? ` RSSI:${d.rssi}` : "";
+        opt.textContent = `${name} — ${d.address}${rssi}`;
+        bleListEl.appendChild(opt);
+      }
+    }
+
+    // BLE button actions
+    btnBleScan && btnBleScan.addEventListener("click", () => {
+      bleSetState("scanning");
+      bleSetHint("Scanning…");
+      send({type:"ble", op:"scan", timeout:4.0});
+    });
+
+    btnBleConnect && btnBleConnect.addEventListener("click", () => {
+      const addr = bleListEl ? bleListEl.value : "";
+      if(!addr){ bleSetHint("Chọn 1 thiết bị trước"); return; }
+      bleSetState("connecting");
+      send({type:"ble", op:"connect", address:addr});
+    });
+
+    btnBleDisconnect && btnBleDisconnect.addEventListener("click", () => {
+      bleSetState("disconnecting");
+      send({type:"ble", op:"disconnect"});
+    });
+
+    btnBleWrite && btnBleWrite.addEventListener("click", () => {
+      const text = (inBleText && inBleText.value) ? inBleText.value : "";
+      send({type:"ble", op:"write", encoding:"text", data:text});
+    });
+
+    btnBleSendWifi && btnBleSendWifi.addEventListener("click", () => {
+      bleSetHint("Sending Wi‑Fi…");
+      send({type:"ble", op:"write_wifi"});
+    });
+
+    function handleBleMsg(data){
+      if(!data || typeof data !== "object") return false;
+      if(!data.type || typeof data.type !== "string") return false;
+      if(!data.type.startsWith("ble_")) return false;
+
+      if(data.type === "ble_scan_result"){
+        bleSetState("scan_done");
+        bleFillList(data.devices || []);
+        bleSetHint(`Found ${(data.devices||[]).length} device(s)`);
+        return true;
+      }
+      if(data.type === "ble_state"){
+        bleSetState(data.state || "—");
+        if(data.address) bleSetHint(`Address: ${data.address}`);
+        return true;
+      }
+      if(data.type === "ble_wifi_sent"){
+        const ssid = data.ssid || "—";
+        const n = (data.pass_len != null) ? data.pass_len : "—";
+        bleSetHint(`Sent Wi‑Fi: ssid=${ssid} pass_len=${n}`);
+        return true;
+      }
+      if(data.type === "ble_write_ok"){
+        bleSetHint(`Write OK: ${data.nbytes} bytes`);
+        return true;
+      }
+      if(data.type === "ble_error"){
+        bleSetState("error");
+        bleSetHint(`BLE error: ${data.err || "unknown"}`);
+        return true;
+      }
+      return true;
+    }
+
+
+
+    // actions -> đúng format main.py build_control
+    btnTrigOn.addEventListener("click", () => send({cmd:1}));
+    btnTrigOff.addEventListener("click", () => send({cmd:0}));
+
+    btnRepeatApply.addEventListener("click", () => {
+      const wt = parseInt(inWork.value || "0", 10);
+      const dt = parseInt(inDur.value || "0", 10);
+      send({cmd:2, work_time: wt, duration_time: dt});
+    });
+
+    btnRepeatStop.addEventListener("click", () => {
+      send({cmd:0});
+    });
+
+    btnUnlockAll.addEventListener("click", () => send({cmd:3}));
+    btnLockApp.addEventListener("click", () => send({cmd:4}));
+    btnLockDevice.addEventListener("click", () => send({cmd:5}));
+
+    btnSave0.addEventListener("click", () => send({cmd:6}));
+    btnSave1.addEventListener("click", () => send({cmd:7}));
+    btnSave2.addEventListener("click", () => send({cmd:8}));
+
+    function connect(){
+      connText.textContent = "Connecting…";
+      setConn("warn");
+
+      ws = new WebSocket(wsUrl);
+
+      ws.onopen = () => {
+        connText.textContent = "WS Connected";
+        setConn("ok");
+        retryMs = 400;
+        setHint("Connected.");
+      };
+
+      ws.onclose = () => {
+        connText.textContent = "WS Disconnected • reconnecting…";
+        setConn("bad");
+        setHint("Mất kết nối WS, đang reconnect…");
+        setTimeout(connect, retryMs);
+        retryMs = Math.min(retryMs * 2, 8000);
+      };
+
+      ws.onerror = () => {
+        connText.textContent = "WS Error";
+        setConn("bad");
+        setHint("WebSocket error");
+      };
+
+      ws.onmessage = (ev) => {
+        try{
+          const data = JSON.parse(ev.data);
+
+          // ACK from server
+          if (data && typeof data === "object" && ("ok" in data) && ("payload" in data || "err" in data)){
+            if (data.ok === true) setHint("Publish queued OK");
+            else setHint(`Publish fail: ${data.err || "unknown"}`);
+            return;
+          }
+
+          // BLE messages
+          if (handleBleMsg(data)) return;
+
+          // snapshot state
+          render(data);
+          // also refresh BLE state from snapshot
+          if (data && data.ble) {
+            bleSetState(data.ble.connected ? "connected" : "idle");
+          }
+}catch(e){}
+      };
+    }
+
+    connect();
+  </script>
+</body>
+</html>
