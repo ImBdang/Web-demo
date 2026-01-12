@@ -28,7 +28,7 @@ except Exception:
 # =========================
 # CONFIG (hardcode-friendly)
 # =========================
-MQTT_HOST = os.getenv("MQTT_HOST", "13.212.179.167")
+MQTT_HOST = os.getenv("MQTT_HOST", "")
 MQTT_PORT = int(os.getenv("MQTT_PORT", "1883"))
 MQTT_CONTROL_TOPIC = os.getenv("MQTT_CONTROL_TOPIC", "/device/datic/control")
 MQTT_STATUS_TOPIC  = os.getenv("MQTT_STATUS_TOPIC",  "/device/datic/status")
